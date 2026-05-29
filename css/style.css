@@ -132,8 +132,55 @@ html, body {
 }
 
 #loading.hidden,
-#craft-panel.hidden {
+#craft-panel.hidden,
+#game-over.hidden {
   display: none;
+}
+
+#game-over {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 60;
+  pointer-events: auto;
+}
+
+.game-over-box {
+  background: rgba(22, 24, 32, 0.95);
+  border: 2px solid #c0392b;
+  border-radius: 10px;
+  padding: 24px 32px;
+  text-align: center;
+  color: #fff;
+}
+
+.game-over-box h2 {
+  margin-bottom: 10px;
+  color: #e74c3c;
+}
+
+.game-over-box p {
+  margin-bottom: 16px;
+  color: #ccc;
+  font-size: 14px;
+}
+
+#respawn-btn {
+  padding: 10px 24px;
+  border: none;
+  border-radius: 6px;
+  background: #27ae60;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+#respawn-btn:hover {
+  background: #2ecc71;
 }
 
 #craft-panel {

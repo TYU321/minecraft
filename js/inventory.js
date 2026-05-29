@@ -33,6 +33,30 @@ export class Inventory {
     return slot.blockId;
   }
 
+  getHeldItem() {
+    const slot = this.getSelected();
+
+    if (slot.tool) {
+      let iconKey = slot.icon;
+      if (!iconKey) {
+        iconKey = slot.tool === 'bow' ? 'bow' : `${slot.tool}_${slot.tier}`;
+      }
+      let image = assets.items?.[iconKey];
+      if (!image && slot.tier === 'wood' && slot.tool !== 'bow') {
+        image = assets.items[`${slot.tool}_bronze`];
+      }
+      return image ? { image, kind: 'tool', tool: slot.tool } : null;
+    }
+
+    if (slot.blockId && slot.count > 0) {
+      const iconKey = BLOCK_ICON[slot.blockId] || 'dirt';
+      const image = assets.items?.[iconKey];
+      return image ? { image, kind: 'block' } : null;
+    }
+
+    return null;
+  }
+
   hasEmptySlot() {
     return this.slots.some((s) => !s.blockId && !s.tool);
   }

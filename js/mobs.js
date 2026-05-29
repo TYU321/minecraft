@@ -1,4 +1,4 @@
-import { GRAVITY, MAX_FALL, WORLD_WIDTH } from './constants.js';
+import { GRAVITY, MAX_FALL, WORLD_WIDTH, WORLD_BORDER_WIDTH } from './constants.js';
 import { MOB_TYPES, MOB_TYPE_IDS } from './mobDefs.js';
 import {
   moveAxis, resolveMobOverlap, collidesWithWorld, canMoveTo,
@@ -35,16 +35,26 @@ export class Mob {
     this.attackTimer = 0;
     this.dead = false;
     this.hitFlash = 0;
+    this.hitTimer = 0;
+    this.hitKnockX = 0;
+    this.hitShake = 0;
   }
 
   get centerX() {
     return this.x + this.def.width / 2;
   }
 
-  takeDamage(amount) {
+  takeDamage(amount, attackerX) {
     if (this.dead) return;
     this.hp -= amount;
-    this.hitFlash = 0.15;
+    this.hitFlash = 0.35;
+    this.hitTimer = 0.3;
+    this.hitShake = Math.random() * Math.PI * 2;
+    if (attackerX != null) {
+      let dir = Math.sign(this.centerX - attackerX);
+      if (dir === 0) dir = this.facing;
+      this.hitKnockX = dir * 0.4;
+    }
     if (this.hp <= 0) this.dead = true;
   }
 
@@ -70,6 +80,11 @@ export class Mob {
     if (this.dead) return;
 
     this.hitFlash = Math.max(0, this.hitFlash - dt);
+    this.hitTimer = Math.max(0, this.hitTimer - dt);
+    if (this.hitTimer <= 0) {
+      this.hitKnockX *= 0.85;
+      if (Math.abs(this.hitKnockX) < 0.02) this.hitKnockX = 0;
+    }
     this.attackTimer = Math.max(0, this.attackTimer - dt);
 
     const def = this.def;
@@ -125,11 +140,22 @@ export class Mob {
       this.stuckTimer = 0;
     }
 
+    const border = WORLD_BORDER_WIDTH + 1;
+    if (this.x < border) {
+      this.x = border;
+      this.pickNewWanderDir(world);
+    } else if (this.x > world.width - border - w) {
+      this.x = world.width - border - w;
+      this.pickNewWanderDir(world);
+    }
+
     if (Math.abs(this.vx) > 3 && moved > 0.01) {
       this.walkAnim += dt * 8;
     } else {
       this.walkAnim *= 0.85;
     }
+
+    if (player.dead) return;
 
     if (def.hostile && dist < 1.2 && hdist < 1.2 && this.attackTimer <= 0 && vdist < 2.5) {
       player.hp = Math.max(0, player.hp - def.damage);
@@ -175,7 +201,10 @@ export class MobManager {
     const count = 20;
 
     for (let i = 0; i < count; i++) {
-      const tx = 8 + Math.floor(rand() * (world.width - 16));
+      const tx =
+        WORLD_BORDER_WIDTH +
+        2 +
+        Math.floor(rand() * (world.width - WORLD_BORDER_WIDTH * 2 - 4));
       const typeId = pickWeighted(rand);
       const def = MOB_TYPES[typeId];
       const surface = world.surfaceHeights[tx];

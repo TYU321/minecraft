@@ -54,6 +54,8 @@ export const assets = {
   sky: {},
   clouds: null,
   moon: null,
+  deathFrames: [],
+  woodChip: null,
 };
 
 export async function loadAssets() {
@@ -96,6 +98,13 @@ export async function loadAssets() {
       assets.items[name] = await loadImage(`${BASE}/PNG/Tiles/${name}.png`);
     }
   }
+
+  assets.deathFrames = [];
+  for (let i = 0; i < 5; i++) {
+    assets.deathFrames.push(await loadImage(`${BASE}/Effects/death_${i}.png`));
+  }
+
+  assets.woodChip = await loadImage(`${BASE}/Effects/wood_chip.png`);
 }
 
 export function drawTile(ctx, textureKey, screenX, screenY) {
@@ -108,10 +117,10 @@ export function drawTile(ctx, textureKey, screenX, screenY) {
   );
 }
 
-export function drawCharPart(ctx, partKey, dx, dy, scale) {
+export function drawCharPart(ctx, partKey, dx, dy, scale, partScale = 0.28) {
   const frame = assets.charAtlas[partKey];
   if (!frame || !assets.charsSheet) return;
-  const s = scale * 0.28;
+  const s = scale * partScale;
   const w = frame.w * s;
   const h = frame.h * s;
   ctx.drawImage(

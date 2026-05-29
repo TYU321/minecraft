@@ -4,6 +4,8 @@ export const TILE_SCALE = TILE_SIZE / SOURCE_TILE;
 
 export const WORLD_WIDTH = 320;
 export const WORLD_HEIGHT = 120;
+export const WORLD_BORDER_WIDTH = 3;
+export const MAX_TERRAIN_SLOPE = 3;
 
 export const GRAVITY = 1200;
 export const JUMP_HEIGHT_BLOCKS = 3;

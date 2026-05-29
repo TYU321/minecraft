@@ -4,6 +4,7 @@ import { BLOCK } from './constants.js';
 import { blockOverlapsPlayer } from './collision.js';
 import { isCraftingOpen } from './craftingUI.js';
 import { canMineBlock, canPlaceBlock } from './mining.js';
+import { isTreeBlock, spawnWoodChips, spawnBreakParticles, spawnHitParticles } from './particles.js';
 
 export class Input {
   constructor(canvas) {
@@ -36,6 +37,9 @@ export class Input {
     if (down && k === 'c') {
       this.onToggleCraft?.();
     }
+    if (down && (k === 'r' || k === 'к')) {
+      this.onRespawn?.();
+    }
   }
 
   onMouse(e, down) {
@@ -65,6 +69,12 @@ export class Input {
   }
 
   update(dt, game) {
+    if (game.player.dead) return;
+
+    if (!this.mouse.down) {
+      game.player.attackAnim = 0;
+    }
+
     const { inventory, camera, world, player } = game;
     const { tx, ty } = this.screenToWorld(camera, this.mouse.x, this.mouse.y);
 
@@ -87,9 +97,11 @@ export class Input {
 
     const mob = mobs?.getAtTile(tx, ty);
     if (mob) {
+      game.player.attackAnim = this.mineProgress;
       this.handleMobAttack(dt, game, mob);
       return;
     }
+    game.player.attackAnim = 0;
 
     if (!canMineBlock(world, player, tx, ty)) {
       this.mineTarget = null;
@@ -110,7 +122,14 @@ export class Input {
       inventory.getToolType(),
       inventory.getToolTier()
     );
+    const prevProgress = this.mineProgress;
     this.mineProgress += dt * speed;
+
+    if (isTreeBlock(tile) && this.mineProgress > prevProgress) {
+      if (Math.random() < dt * 14) {
+        spawnWoodChips(game, tx, ty, 1 + Math.floor(Math.random() * 2));
+      }
+    }
 
     if (this.mineProgress >= 1) {
       const def = TILE_DEFS[tile];
@@ -121,7 +140,7 @@ export class Input {
       }
       this.mineProgress = 0;
       this.mineTarget = null;
-      game.mineParticles?.push({ x: tx, y: ty, life: 0.3 });
+      spawnBreakParticles(game, tx, ty, tile);
     }
   }
 
@@ -144,16 +163,15 @@ export class Input {
     speed *= tierMult;
 
     this.mineProgress += dt * speed;
+    game.player.attackAnim = this.mineProgress;
+
     if (this.mineProgress >= 1) {
       const dmg = tool === 'sword' ? 20 : tool === 'flail' ? 15 : 8;
-      mob.takeDamage(dmg);
+      mob.takeDamage(dmg, game.player.x + 0.5);
+      spawnHitParticles(game, mob);
+      game.player.attackAnim = 1;
       this.mineProgress = 0;
       this.mineTarget = null;
-      game.mineParticles?.push({
-        x: Math.floor(mob.x),
-        y: Math.floor(mob.y),
-        life: 0.25,
-      });
     }
   }
 

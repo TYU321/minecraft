@@ -1,4 +1,6 @@
-import { BLOCK, WORLD_WIDTH, WORLD_HEIGHT, PLAYER_HEIGHT } from './constants.js';
+import {
+  BLOCK, WORLD_WIDTH, WORLD_HEIGHT, PLAYER_HEIGHT, WORLD_BORDER_WIDTH,
+} from './constants.js';
 import { isSolid } from './tiles.js';
 import { generateWorld } from './worldGen.js';
 import { collidesWithWorld } from './collision.js';
@@ -10,6 +12,7 @@ export class World {
     this.surfaceHeights = generated.surfaceHeights;
     this.width = WORLD_WIDTH;
     this.height = WORLD_HEIGHT;
+    this.borderWidth = WORLD_BORDER_WIDTH;
   }
 
   index(x, y) {
@@ -31,6 +34,7 @@ export class World {
   }
 
   isSolidAt(x, y) {
+    if (x < 0 || x >= this.width || y < 0 || y >= this.height) return true;
     return isSolid(this.getTile(x, y));
   }
 

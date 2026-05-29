@@ -1,4 +1,6 @@
-import { BLOCK, WORLD_WIDTH, WORLD_HEIGHT } from './constants.js';
+import {
+  BLOCK, WORLD_WIDTH, WORLD_HEIGHT, WORLD_BORDER_WIDTH, MAX_TERRAIN_SLOPE,
+} from './constants.js';
 import { ORE_DEFS } from './ores.js';
 
 function seededRandom(seed) {
@@ -41,24 +43,21 @@ export function generateWorld(seed = Date.now()) {
     let height = baseSurface;
 
     if (biome < 0.32) {
-      height += smoothNoise(rand, x, 50) * 0.6;
-      height += Math.sin(x * 0.05) * 0.4;
+      height += smoothNoise(rand, x, 50) * 0.5;
     } else if (biome > 0.62) {
       const peak = (biome - 0.62) / 0.38;
-      height += Math.sin(x * 0.06) * 10 * peak;
-      height += Math.sin(x * 0.018) * 18 * peak;
-      height += smoothNoise(rand, x, 10) * 12 * peak;
-      height += Math.abs(smoothNoise(rand, x, 4)) * 8 * peak;
+      height += smoothNoise(rand, x, 20) * 1.5 * peak;
+      height += Math.sin(x * 0.04) * 1.2 * peak;
     } else {
       const blend = (biome - 0.32) / 0.3;
-      height += Math.sin(x * 0.035) * 2.5 * blend;
-      height += smoothNoise(rand, x, 22) * 3 * blend;
+      height += smoothNoise(rand, x, 28) * 1.2 * blend;
     }
 
     surfaceHeights[x] = Math.floor(height);
   }
 
   smoothSurfaceSelective(surfaceHeights, biomes);
+  clampSurfaceSlopes(surfaceHeights, MAX_TERRAIN_SLOPE);
 
   for (let x = 0; x < WORLD_WIDTH; x++) {
     const surface = surfaceHeights[x];
@@ -111,7 +110,7 @@ export function generateWorld(seed = Date.now()) {
     }
   }
 
-  for (let x = 0; x < WORLD_WIDTH; x++) {
+  for (let x = WORLD_BORDER_WIDTH; x < WORLD_WIDTH - WORLD_BORDER_WIDTH; x++) {
     if (surfaceHeights[x] > WORLD_HEIGHT - 8) continue;
     for (let y = surfaceHeights[x] + 8; y < WORLD_HEIGHT - 3; y++) {
       if (rand() < 0.002 && get(world, x, y) === BLOCK.AIR) {
@@ -126,7 +125,46 @@ export function generateWorld(seed = Date.now()) {
     }
   }
 
+  buildWorldBorders(world, surfaceHeights);
+
   return { data: world, surfaceHeights, seed };
+}
+
+function clampSurfaceSlopes(heights, maxStep) {
+  for (let pass = 0; pass < 5; pass++) {
+    for (let x = 1; x < heights.length; x++) {
+      if (heights[x] > heights[x - 1] + maxStep) {
+        heights[x] = heights[x - 1] + maxStep;
+      }
+      if (heights[x] < heights[x - 1] - maxStep) {
+        heights[x] = heights[x - 1] - maxStep;
+      }
+    }
+    for (let x = heights.length - 2; x >= 0; x--) {
+      if (heights[x] > heights[x + 1] + maxStep) {
+        heights[x] = heights[x + 1] + maxStep;
+      }
+      if (heights[x] < heights[x + 1] - maxStep) {
+        heights[x] = heights[x + 1] - maxStep;
+      }
+    }
+  }
+}
+
+function buildWorldBorders(world, surfaceHeights) {
+  for (let bx = 0; bx < WORLD_BORDER_WIDTH; bx++) {
+    const leftX = bx;
+    const rightX = WORLD_WIDTH - 1 - bx;
+    for (let y = 0; y < WORLD_HEIGHT; y++) {
+      set(world, leftX, y, BLOCK.STONE);
+      set(world, rightX, y, BLOCK.STONE);
+    }
+    surfaceHeights[leftX] = Math.min(surfaceHeights[leftX], surfaceHeights[WORLD_BORDER_WIDTH]);
+    surfaceHeights[rightX] = Math.min(
+      surfaceHeights[rightX],
+      surfaceHeights[WORLD_WIDTH - 1 - WORLD_BORDER_WIDTH]
+    );
+  }
 }
 
 function scatterTrees(world, surfaceHeights, biomes, rand) {

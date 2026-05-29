@@ -1,0 +1,257 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #1a1a2e;
+  font-family: "Segoe UI", Tahoma, sans-serif;
+}
+
+#game {
+  display: block;
+  width: 100vw;
+  height: 100vh;
+  cursor: crosshair;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+#ui {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  padding-bottom: 16px;
+  gap: 8px;
+}
+
+#hp-bar {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  width: 200px;
+  height: 24px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 2px solid #444;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+#hp-fill {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(180deg, #e74c3c, #c0392b);
+  transition: width 0.2s;
+}
+
+#hp-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: #fff;
+  text-shadow: 1px 1px 2px #000;
+}
+
+#hotbar {
+  display: flex;
+  gap: 4px;
+  padding: 6px;
+  background: rgba(0, 0, 0, 0.55);
+  border: 2px solid #555;
+  border-radius: 6px;
+}
+
+.hotbar-slot {
+  width: 48px;
+  height: 48px;
+  background: rgba(40, 40, 50, 0.9);
+  border: 2px solid #333;
+  border-radius: 4px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hotbar-slot.active {
+  border-color: #f1c40f;
+  box-shadow: 0 0 8px rgba(241, 196, 15, 0.5);
+}
+
+.hotbar-slot img {
+  width: 36px;
+  height: 36px;
+  image-rendering: pixelated;
+}
+
+.hotbar-slot .count {
+  position: absolute;
+  bottom: 2px;
+  right: 4px;
+  font-size: 11px;
+  color: #fff;
+  text-shadow: 1px 1px 1px #000;
+  font-weight: bold;
+}
+
+.hotbar-slot .slot-num {
+  position: absolute;
+  top: 2px;
+  left: 4px;
+  font-size: 10px;
+  color: #aaa;
+}
+
+#controls {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.75);
+  text-shadow: 1px 1px 2px #000;
+}
+
+#loading {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #1a1a2e;
+  color: #fff;
+  font-size: 24px;
+  z-index: 100;
+}
+
+#loading.hidden,
+#craft-panel.hidden {
+  display: none;
+}
+
+#craft-panel {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(480px, 94vw);
+  max-height: 80vh;
+  overflow-y: auto;
+  background: rgba(22, 24, 32, 0.95);
+  border: 2px solid #666;
+  border-radius: 8px;
+  padding: 16px;
+  z-index: 50;
+  pointer-events: auto;
+  color: #eee;
+}
+
+#craft-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+#craft-header h2 {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+#craft-close {
+  width: 32px;
+  height: 32px;
+  font-size: 22px;
+  line-height: 1;
+  border: none;
+  border-radius: 4px;
+  background: #444;
+  color: #fff;
+  cursor: pointer;
+}
+
+#craft-close:hover {
+  background: #c0392b;
+}
+
+.craft-hint {
+  font-size: 12px;
+  color: #aaa;
+  margin-bottom: 12px;
+}
+
+#craft-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.craft-recipe {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: 6px;
+  border: 1px solid #444;
+}
+
+.craft-recipe-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+
+.craft-result-icon {
+  width: 40px;
+  height: 40px;
+  image-rendering: pixelated;
+}
+
+.craft-cost {
+  font-size: 11px;
+  color: #bbb;
+  margin-top: 4px;
+}
+
+.craft-recipe button {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 4px;
+  background: #27ae60;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.craft-recipe button:disabled {
+  background: #555;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.craft-recipe button:not(:disabled):hover {
+  background: #2ecc71;
+}
+
+.craft-group-title {
+  font-size: 14px;
+  color: #f1c40f;
+  margin: 12px 0 6px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #444;
+}
+
+.craft-group-title:first-child {
+  margin-top: 0;
+}

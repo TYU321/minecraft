@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Voxel Sandbox</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <canvas id="game" tabindex="0"></canvas>
+  <div id="ui">
+    <div id="hp-bar">
+      <div id="hp-fill"></div>
+      <span id="hp-text">100 / 100</span>
+    </div>
+    <div id="hotbar"></div>
+    <p id="controls">A/D — движение · Space — прыжок · ЛКМ — копать/бить · ПКМ — ставить · 1–9 — слот · C — крафт</p>
+  </div>
+  <div id="craft-panel" class="hidden">
+    <div id="craft-header">
+      <h2>Крафт</h2>
+      <button type="button" id="craft-close" aria-label="Закрыть">×</button>
+    </div>
+    <p class="craft-hint">Ресурсы берутся из хотбара. Нужен свободный слот для инструмента.</p>
+    <div id="craft-list"></div>
+  </div>
+  <div id="loading">Загрузка...</div>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
